@@ -1,14 +1,12 @@
 if [ -r "$HOME/.azotebg" ]; then
-  . $HOME/.azotebg
+  . $HOME/.azotebg &
 else
   swaybg -i $HOME/Pictures/wallpapers/bunsen/default/Boron-Emerald-logo-1920x1080.png -m stretch &
 fi
 
 sfwbar &
 
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-
-thunar --daemon &
+pidof thunar >/dev/null 2>&1 || thunar --daemon &
 
 # clipboard
 type cliphist >/dev/null 2>&1 && wl-paste --watch cliphist store &
@@ -27,4 +25,3 @@ else
 	resume 'wlopm --on \*' \
 	before-sleep 'swaylock -f -i $HOME/Pictures/wallpapers/bunsen/default/Boron-Emerald-logo-1920x1080.png' >/dev/null 2>&1 &
 fi
-

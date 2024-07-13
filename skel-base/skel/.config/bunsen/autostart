@@ -9,7 +9,7 @@
 ## will be executed to launch any applications
 ## you want to run at startup.
 ##
-## NB, like openbox's autostart script, this uses the default shell,
+## NB, like openbox's and labwc's autostart script, this uses the default shell,
 ## so "bashisms" are not supported.
 ##
 ## (Environment variables are set in ~/.config/bunsen/environment.)
@@ -32,24 +32,34 @@
 ## and edited the window-manager-dependent section later in this file.
 ## Use the window manager's actual command, not name.
 ## This should be the first uncommented line in this file:
+## NOTE: if you are using wayland you don't need to reset this if using 'labwc'
+## however can be changed to some other compositor like sway, hyprland, river etc
 window_manager=openbox
 
 # test if chosen window manager is actually running (you should probably not edit this line)
-pgrep -x -u "$USER" "$window_manager" || { echo "$0: Window manager $window_manager is not running." >&2 ; exit 1;}
+if [ -z "$WAYLAND_DISPLAY" ]; then
+    pgrep -x -u "$USER" "$window_manager" || { echo "$0: Window manager $window_manager is not running." >&2 ; exit 1;}
+fi
 
 ### SETTINGS START
 
 # start keybinds daemon
 # (If this clashes with some window manager's keybinds,
 # you can move it to the window-manager-dependent section below.)
-xbindkeys_autostart
+if [ -z "$WAYLAND_DISPLAY" ]; then
+    xbindkeys_autostart
+fi
 
 ## Turn on/off system beep.
-xset b off
+if [ -z "$WAYLAND_DISPLAY" ]; then
+    xset b off
+fi
 
 ## Set keyboard settings - 250 ms delay and 25 cps (characters per second) repeat rate.
 ## Adjust the values according to your preferances.
-xset r rate 250 25
+if [ -z "$WAYLAND_DISPLAY" ]; then # compositor sets this
+    xset r rate 250 25
+fi
 
 ## Add keyboard mapping.
 #xmodmap -e "keysym Insert = Multi_key"
@@ -63,19 +73,24 @@ xset r rate 250 25
 
 ## Configure touchpad. See 'man synaptics' for more info.
 ## (Now might be using libinput instead of synaptics.)
-synclient VertEdgeScroll=1 HorizEdgeScroll=1 VertTwoFingerScroll=1 TapButton1=1 2>/dev/null
+if [ -z "$WAYLAND_DISPLAY" ]; then # compositor sets this
+    synclient VertEdgeScroll=1 HorizEdgeScroll=1 VertTwoFingerScroll=1 TapButton1=1 2>/dev/null
+fi
 ## alternative:
 #synclient VertEdgeScroll=0 VertTwoFingerScroll=0 HorizEdgeScroll=0 TapButton1=1 TapButton2=3 TapButton3=2 PalmDetect=1 PalmMinWidth=4 PalmMinZ=100
 
 ## Disable touchpad while typing
-syndaemon -i .5 -K -t -R -d &
+if [ -z "$WAYLAND_DISPLAY" ]; then # compositor sets this
+    syndaemon -i .5 -K -t -R -d &
+fi
 
 ### TOUCHPAD END
 
 ### SETTINGS END
 
 ## GNOME PolicyKit authentication
-/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
+[ -x /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 ] && \
+  /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
 
 #######################################################
 ######## window-manager-dependent applications ########
@@ -140,7 +155,9 @@ esac
 #pnmixer &
 
 ## Start Clipboard manager
-xfce4-clipman &
+if [ -z "$WAYLAND_DISPLAY" ]; then # wayland clipboard can be started by compositor
+    xfce4-clipman &
+fi
 
 ## Start Thunar Daemon, if set as bl-file-manager
 if [ "$(readlink -f "$(which bl-file-manager)")" = "$(which thunar)" ]

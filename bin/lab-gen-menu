@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# script to generate labwc menu with pipe-menus
+# prints to stdout or redirects to menu.xml
+[ -d "$HOME/.config/labwc" ] && OPT="$HOME/.config/labwc/menu.xml" || OPT="/dev/stdout"
+[ "$1" = '-s' ] && OPT="/dev/stdout"
+
+# header
+(printf "%s\n\n%s\n" '<?xml version="1.0" encoding="UTF-8"?>' '<openbox_menu>'
+printf "  %s\n" '<menu id="root-menu" label="root-menu">' 
+printf "    %s\n" '<item label="Web browser"><action name="Execute" command="x-www-browser" /></item>'
+printf "    %s\n" '<item label="Terminal"><action name="Execute" command="x-terminal-emulator" /></item>'
+printf "    %s\n" '<item label="Text Editor"><action name="Execute" command="bl-text-editor" /></item>'
+printf "    %s\n" '<item label="File Manager"><action name="Execute" command="bl-file-manager" /></item>'
+if type app-list-cut.sh >/dev/null 2>&1 ; then
+  printf "  %s\n" '<menu id="Windows" label="Windows" execute="app-list-cut.sh" /> <!-- pipemenu -->'
+fi
+printf "  %s%s%s%s%s\n" '<menu id="Applications" label="Applications" execute="labwc-menu-generator -p -t ' "'" 'lxterminal -e' "'" '" /> <!-- pipemenu -->'
+if type bl-libreoffice-pipemenu >/dev/null 2>&1 ; then
+  printf "  %s\n" '<menu id="Libreoffice" label="Libreoffice" execute="bl-libreoffice-pipemenu" /> <!-- pipemenu -->'
+fi
+if type bl-w-imgur-pipemenu >/dev/null 2>&1 ; then
+  printf "  %s\n" '<menu id="Screenshot" label="Screenshot" execute="bl-w-imgur-pipemenu" /> <!-- pipemenu -->'
+fi
+if type bl-places-pipemenu >/dev/null 2>&1 ; then
+  printf "  %s\n" '<menu id="Places" label="Places" execute="bl-places-pipemenu" /> <!-- pipemenu -->'
+fi
+printf "  %s\n" '<separator />'
+printf "  %s\n" '<menu id="Exit" label="Exit">'
+printf "    %s\n" '<item label="Reconfigure"><action name="Reconfigure" /></item>'
+printf "    %s\n" '<item label="Logout"><action name="Execute" command="wlogout" /></item>'
+printf "  %s\n" '</menu> <!-- exit-menu -->'
+printf "  %s\n" '</menu> <!-- root-menu -->'
+printf "%s\n" '</openbox_menu>') > $OPT

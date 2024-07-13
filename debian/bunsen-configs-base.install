@@ -4,6 +4,7 @@ geany usr/share
 skel usr/share/bunsen
 skel-base/skel usr/share/bunsen
 Bunsen-lightdm usr/share/icons
+bunsenlabs-wayland.desktop usr/share/wayland-sessions
 bunsenlabs.desktop usr/share/xsessions
 lightdm.conf.d usr/share/lightdm
 lightdm-gtk-greeter.conf.d usr/share/lightdm
